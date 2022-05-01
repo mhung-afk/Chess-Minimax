@@ -21,11 +21,31 @@ def main():
     screen.fill(p.Color('white'))
     gs = ChessEngine.GameState()
     loadImages()
+
     running = True
+    sqSelected = () # tuple (row, col)
+    playerClicks = [] # list of 2 tuples: [(start_row, start_col), (end_row, end_col)]
     while running:
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
+            elif e.type == p.MOUSEBUTTONDOWN:
+                location = p.mouse.get_pos()
+                col = int(location[0]/SQ_SIZE)
+                row = int(location[1]/SQ_SIZE)
+                if sqSelected == (row, col) or (gs.board[row][col] == '--' and sqSelected == ()):
+                    sqSelected = ()
+                    playerClicks = []
+                else:
+                    sqSelected = (row, col)
+                    playerClicks += [sqSelected]
+                if len(playerClicks) == 2:
+                    move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
+                    print(move.getChessNotation())
+                    gs.makeMove(move)
+                    sqSelected = ()
+                    playerClicks = []
+
         drawGameState(screen, gs)
         clock.tick(MAX_FPS)
         p.display.flip()
