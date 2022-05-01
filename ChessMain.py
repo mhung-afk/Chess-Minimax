@@ -2,12 +2,8 @@
 
 import pygame as p
 import ChessEngine
+from constrant import *
 
-WIDTH = HEIGHT = 400
-DIMENSION = 8
-SQ_SIZE = HEIGHT/DIMENSION
-MAX_FPS = 15
-IMAGES = {}
 
 def loadImages():
     pieces = ['wp','bp','wr','br','wn','bn','wb','bb','wq','bq','wk','bk']
@@ -20,6 +16,9 @@ def main():
     clock = p.time.Clock()
     screen.fill(p.Color('white'))
     gs = ChessEngine.GameState()
+    validMoves = gs.getAllPossibleMove()
+    moveMade = False
+
     loadImages()
 
     running = True
@@ -41,11 +40,16 @@ def main():
                     playerClicks += [sqSelected]
                 if len(playerClicks) == 2:
                     move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
-                    print(move.getChessNotation())
-                    gs.makeMove(move)
+                    if move in validMoves:
+                        gs.makeMove(move)
+                        print(move.getChessNotation())
+                        moveMade =True
                     sqSelected = ()
                     playerClicks = []
 
+        if moveMade:
+            validMoves = gs.getAllPossibleMove()
+            moveMade = False
         drawGameState(screen, gs)
         clock.tick(MAX_FPS)
         p.display.flip()

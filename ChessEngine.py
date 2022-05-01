@@ -1,5 +1,8 @@
 # handle rules, valid move, log move
 
+from constrant import *
+
+
 class GameState:
     def __init__(self):
         self.board = [
@@ -20,6 +23,29 @@ class GameState:
         self.board[move.endRow][move.endCol] = move.pieceMoved
         self.moveLog += [move]
         self.whiteToMove = not self.whiteToMove
+    
+    def getAllPossibleMove(self):
+        moves = [] # list of move object, example: Move((6,4), (4,4), self.board)
+        for r in range(DIMENSION):
+            for c in range(DIMENSION):
+                turn = self.board[r][c][0]
+                if (turn == 'w' and self.whiteToMove) or (turn == 'b' and not self.whiteToMove):
+                    piece = self.board[r][c][1]
+
+                    # append to list moves for each piece
+                    if piece == 'p':
+                        pass
+                    elif piece == 'r':
+                        pass
+                    elif piece == 'n':
+                        pass
+                    elif piece == 'b':
+                        pass
+                    elif piece == 'q':
+                        pass
+                    elif piece == 'k':
+                        pass
+        return moves
 
 class Move:
     ranksToRows = {"1":7,"2":6,"3":5,"4":4,"5":3,"6":2,"7":1,"8":0}
@@ -34,6 +60,9 @@ class Move:
         self.endCol = endSq[1]
         self.pieceMoved = board[self.startRow][self.startCol]
         self.pieceCaptured = board[self.endRow][self.endCol]
+
+    def __eq__(self, other):
+        return self.startRow == other.startRow and self.startCol == other.startCol and self.endRow == other.endRow and self.endCol == other.endCol
 
     def getChessNotation(self):
         return self.getRankFile(self.startRow, self.startCol) + ' - ' + self.getRankFile(self.endRow, self.endCol)
