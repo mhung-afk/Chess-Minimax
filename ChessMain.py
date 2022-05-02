@@ -16,7 +16,7 @@ def main():
     clock = p.time.Clock()
     screen.fill(p.Color('white'))
     gs = ChessEngine.GameState()
-    validMoves = gs.getAllPossibleMove()
+    validMoves = gs.getValidMoves()
     moveMade = False
 
     loadImages()
@@ -48,7 +48,7 @@ def main():
                     playerClicks = []
 
         if moveMade:
-            validMoves = gs.getAllPossibleMove()
+            validMoves = gs.getValidMoves()
             moveMade = False
         drawGameState(screen, gs)
         clock.tick(MAX_FPS)
