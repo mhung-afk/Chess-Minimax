@@ -55,8 +55,6 @@ class GameState:
                 # capture an enemy piece
                 if c <= 6 and self.board[r-1][c+1][0] == 'b':
                     moves += [Move((r, c), (r-1, c+1), self.board)]
-            elif r == 0:  # promote white pawn
-                pass
         else:
             if r <= 6:
                 if self.board[r+1][c] == '--':  # pawn move one square
@@ -70,8 +68,6 @@ class GameState:
                 # capture an enemy piece
                 if c <= 6 and self.board[r+1][c+1][0] == 'w':
                     moves += [Move((r, c), (r+1, c+1), self.board)]
-            elif r == 7:  # promote black pawn
-                pass
 
     def getRookMoves(self, r, c, moves):
         pass
@@ -109,7 +105,7 @@ class Move:
         return self.startRow == other.startRow and self.startCol == other.startCol and self.endRow == other.endRow and self.endCol == other.endCol
 
     def getChessNotation(self):
-        return self.getRankFile(self.startRow, self.startCol) + ' - ' + self.getRankFile(self.endRow, self.endCol)
+        return self.pieceMoved + ':  ' +  self.getRankFile(self.startRow, self.startCol) + ' - ' + self.getRankFile(self.endRow, self.endCol)
 
     def getRankFile(self, r, c):
         return self.colsToFiles[c] + self.rowsToRanks[r]
