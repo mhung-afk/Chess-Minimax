@@ -22,7 +22,7 @@ class GameState:
 
     def makeMove(self, move):
         self.board[move.startRow][move.startCol] = '--'
-        self.board[move.endRow][move.endCol] = move.pieceMoved
+        self.board[move.endRow][move.endCol] = move.pieceMoved[0] + move.promoteTo if move.promoteTo else move.pieceMoved
         self.moveLog += [move]
         self.whiteToMove = not self.whiteToMove
 
@@ -149,12 +149,14 @@ class Move:
         self.endCol = endSq[1]
         self.pieceMoved = board[self.startRow][self.startCol]
         self.pieceCaptured = board[self.endRow][self.endCol]
+        self.isPromote = (self.pieceMoved == 'wp' and self.endRow == 0) or (self.pieceMoved == 'bp' and self.endRow == 7)
+        self.promoteTo = None
 
     def __eq__(self, other):
         return self.startRow == other.startRow and self.startCol == other.startCol and self.endRow == other.endRow and self.endCol == other.endCol
 
     def getChessNotation(self):
-        return self.pieceMoved + ':  ' +  self.getRankFile(self.startRow, self.startCol) + ' - ' + self.getRankFile(self.endRow, self.endCol)
+        return self.pieceMoved + ':  ' +  self.getRankFile(self.startRow, self.startCol) + ' - ' + self.getRankFile(self.endRow, self.endCol) + ((' promote to ' + self.promoteTo) if self.isPromote else '')
 
     def getRankFile(self, r, c):
         return self.colsToFiles[c] + self.rowsToRanks[r]
