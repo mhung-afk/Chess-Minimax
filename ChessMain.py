@@ -39,6 +39,9 @@ def main():
                     sqSelected = (row, col)
                     playerClicks += [sqSelected]
                 if len(playerClicks) == 2:
+                    if gs.board[row][col][0] == gs.board[playerClicks[0][0]][playerClicks[0][1]][0]:
+                        playerClicks = playerClicks[1:]
+                        continue
                     move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
                     if move in validMoves:
                         gs.makeMove(move)
