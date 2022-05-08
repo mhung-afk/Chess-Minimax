@@ -24,6 +24,7 @@ def main():
     gs = ChessEngine.GameState()
     validMoves = gs.getValidMoves()
     moveMade = False
+    gameOver = False
 
     loadImages()
     loadLargeImage()
@@ -36,63 +37,72 @@ def main():
             if e.type == p.QUIT:
                 running = False
             elif e.type == p.MOUSEBUTTONDOWN:
-                location = p.mouse.get_pos()
-                col = int(location[0]/SQ_SIZE)
-                row = int(location[1]/SQ_SIZE)
-                if sqSelected == (row, col):
-                    sqSelected = ()
-                    playerClicks = []
-                else:
-                    sqSelected = (row, col)
-                    playerClicks += [sqSelected]
-                if len(playerClicks) == 2:
-                    move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
-                    if move in validMoves:
-                        if move.isPromote: # pawn promote
-                            piece = ''
-                            srunning = True
-                            drawPromoteSelection(p, screen)
-                            drawGameState(screen, gs)
-                            p.display.flip()
-                            while srunning:
-                                for se in p.event.get():
-                                    if se.type == p.QUIT:
-                                        srunning = False
-                                        running = False
-                                    elif se.type == p.MOUSEBUTTONDOWN:
-                                        location = p.mouse.get_pos()
-                                        pieceSelected = int(location[0]/(2*SQ_SIZE))
-                                        if location[1] < DIMENSION*SQ_SIZE:
-                                            break
-                                        else:
-                                            srunning = False
-                                            if pieceSelected == 0:
-                                                piece = 'q'
-                                            elif pieceSelected == 1:
-                                                piece = 'r'
-                                            elif pieceSelected == 2:
-                                                piece = 'n'
-                                            elif pieceSelected == 3:
-                                                piece = 'b'
-                            screen = p.display.set_mode((WIDTH,HEIGHT))
-                            move.promoteTo = piece
-                        gs.makeMove(move)
-                        print(move.getChessNotation())
-                        moveMade =True
+                if not gameOver:
+                    location = p.mouse.get_pos()
+                    col = int(location[0]/SQ_SIZE)
+                    row = int(location[1]/SQ_SIZE)
+                    if sqSelected == (row, col):
                         sqSelected = ()
                         playerClicks = []
                     else:
-                        playerClicks = [sqSelected]
+                        sqSelected = (row, col)
+                        playerClicks += [sqSelected]
+                    if len(playerClicks) == 2:
+                        move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
+                        if move in validMoves:
+                            if move.isPromote: # pawn promote
+                                piece = ''
+                                srunning = True
+                                drawPromoteSelection(p, screen)
+                                drawGameState(screen, gs, validMoves, ())
+                                drawText(screen, 'Promote!')
+                                p.display.flip()
+                                while srunning:
+                                    for se in p.event.get():
+                                        if se.type == p.QUIT:
+                                            srunning = False
+                                            running = False
+                                        elif se.type == p.MOUSEBUTTONDOWN:
+                                            location = p.mouse.get_pos()
+                                            pieceSelected = int(location[0]/(2*SQ_SIZE))
+                                            if location[1] < DIMENSION*SQ_SIZE:
+                                                break
+                                            else:
+                                                srunning = False
+                                                if pieceSelected == 0:
+                                                    piece = 'q'
+                                                elif pieceSelected == 1:
+                                                    piece = 'r'
+                                                elif pieceSelected == 2:
+                                                    piece = 'n'
+                                                elif pieceSelected == 3:
+                                                    piece = 'b'
+                                screen = p.display.set_mode((WIDTH,HEIGHT))
+                                move.promoteTo = piece
+                            gs.makeMove(move)
+                            print(move.getChessNotation())
+                            moveMade =True
+                            sqSelected = ()
+                            playerClicks = []
+                        else:
+                            playerClicks = [sqSelected]
 
         if moveMade:
             validMoves = gs.getValidMoves()
             moveMade = False
-        drawGameState(screen, gs)
+        drawGameState(screen, gs, validMoves, sqSelected)
+        if len(validMoves) == 0:
+            gameOver = True
+            if gs.checkmate:
+                drawText(screen, ('Black' if gs.whiteToMove else 'White') + ' wins!!!')
+            else:
+                drawText(screen, 'Draw!!!')
         clock.tick(MAX_FPS)
         p.display.flip()
 
-def drawGameState(screen, gs):
+def drawGameState(screen, gs, validMoves, sqSelected):
     drawBoard(screen)
+    highlightSqSelected(screen, gs, validMoves, sqSelected)
     drawPieces(screen, gs.board)
 
 def drawBoard(screen):
@@ -119,6 +129,26 @@ def drawPromoteSelection(p, screen):
     screen.blit(LARGE_IMAGES['wr'], p.Rect(2*SQ_SIZE, DIMENSION*SQ_SIZE, 2*SQ_SIZE, 2*SQ_SIZE))
     screen.blit(LARGE_IMAGES['bn'], p.Rect(4*SQ_SIZE, DIMENSION*SQ_SIZE, 2*SQ_SIZE, 2*SQ_SIZE))
     screen.blit(LARGE_IMAGES['wb'], p.Rect(6*SQ_SIZE, DIMENSION*SQ_SIZE, 2*SQ_SIZE, 2*SQ_SIZE))
+
+def highlightSqSelected(screen, gs, validMoves, sqSelected):
+    if sqSelected!=():
+        r,c = sqSelected
+        if gs.board[r][c][0] == ('w' if gs.whiteToMove else 'b'):
+            s = p.Surface((SQ_SIZE, SQ_SIZE))
+            s.set_alpha(80)
+            s.fill(p.Color('blue'))
+            screen.blit(s, (c*SQ_SIZE,r*SQ_SIZE))
+
+            s.fill(p.Color('yellow'))
+            for move in validMoves:
+                if move.startRow == r and move.startCol == c:
+                    screen.blit(s, (move.endCol*SQ_SIZE, move.endRow*SQ_SIZE))
+
+def drawText(screen, text):
+    font = p.font.SysFont('Helvitca', 32, True, False)
+    textObj = font.render(text, 0, p.Color('black'))
+    textLoc = p.Rect(0,0,WIDTH,HEIGHT).move(WIDTH/2 - textObj.get_width()/2, HEIGHT/2 - textObj.get_height()/2)
+    screen.blit(textObj, textLoc)
 
 if __name__ == "__main__":
     main()

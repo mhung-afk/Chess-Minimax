@@ -19,6 +19,7 @@ class GameState:
                              'b': self.getBishopMoves, 'q': self.getQueenMoves, 'k': self.getKingMoves}
         self.whiteToMove = True
         self.moveLog = []
+        self.checkmate = False
 
     def makeMove(self, move):
         self.board[move.startRow][move.startCol] = '--'
