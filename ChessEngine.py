@@ -1,6 +1,6 @@
 # handle rules, valid move, log move
 
-from constrant import *
+from constraint import *
 
 
 class GameState:

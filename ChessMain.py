@@ -2,7 +2,7 @@
 
 import pygame as p
 import ChessEngine
-from constrant import *
+from constraint import *
 
 
 def loadImages():
