@@ -19,7 +19,7 @@ def loadLargeImage():
         LARGE_IMAGES[piece] = p.transform.scale(p.image.load('images/'+piece+'.png'), (2*SQ_SIZE,2*SQ_SIZE))
 
 
-def main(mode = 0):
+def main(mode = 0, firstTurn = True):
     p.init()
     screen = p.display.set_mode((WIDTH,HEIGHT))
     clock = p.time.Clock()
@@ -28,7 +28,7 @@ def main(mode = 0):
     validMoves = gs.getValidMoves()
     moveMade = False
     gameOver = False
-    firstTurnForPlayer = True # Player will have the first turn
+    firstTurnForPlayer = firstTurn # Player will have the first turn
 
     loadImages()
     loadLargeImage()
@@ -37,8 +37,7 @@ def main(mode = 0):
     sqSelected = () # tuple (row, col)
     playerClicks = [] # list of 2 tuples: [(start_row, start_col), (end_row, end_col)]
     while running:
-        playerTurn = firstTurnForPlayer and gs.whiteToMove
-
+        playerTurn = (firstTurnForPlayer == gs.whiteToMove) if mode == 1 else False
         # Player move
         if not gameOver and playerTurn:
             for e in p.event.get():
@@ -171,4 +170,4 @@ def drawText(screen, text):
     print(text)
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main(int(sys.argv[1]), bool(int(sys.argv[2])))
