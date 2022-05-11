@@ -96,7 +96,7 @@ class GameState:
             endCol = c + m[1]
             if 0 <= endRow < 8 and 0 <= endCol < 8:
                 endPiece = self.board[endRow][endCol]
-                if endPiece != allyColor:
+                if endPiece[0] != allyColor:
                     moves.append(Move((r,c), (endRow, endCol), self.board))
 
 

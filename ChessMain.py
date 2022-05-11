@@ -1,7 +1,10 @@
 # handle user interaction
 
+import sys
+from time import sleep
 import pygame as p
 import ChessEngine
+import MoveFinder
 from constraint import *
 
 
@@ -16,7 +19,7 @@ def loadLargeImage():
         LARGE_IMAGES[piece] = p.transform.scale(p.image.load('images/'+piece+'.png'), (2*SQ_SIZE,2*SQ_SIZE))
 
 
-def main():
+def main(mode = 0):
     p.init()
     screen = p.display.set_mode((WIDTH,HEIGHT))
     clock = p.time.Clock()
@@ -25,6 +28,7 @@ def main():
     validMoves = gs.getValidMoves()
     moveMade = False
     gameOver = False
+    firstTurnForPlayer = True # Player will have the first turn
 
     loadImages()
     loadLargeImage()
@@ -33,11 +37,14 @@ def main():
     sqSelected = () # tuple (row, col)
     playerClicks = [] # list of 2 tuples: [(start_row, start_col), (end_row, end_col)]
     while running:
-        for e in p.event.get():
-            if e.type == p.QUIT:
-                running = False
-            elif e.type == p.MOUSEBUTTONDOWN:
-                if not gameOver:
+        playerTurn = firstTurnForPlayer and gs.whiteToMove
+
+        # Player move
+        if not gameOver and playerTurn:
+            for e in p.event.get():
+                if e.type == p.QUIT:
+                    running = False
+                elif e.type == p.MOUSEBUTTONDOWN:
                     location = p.mouse.get_pos()
                     col = int(location[0]/SQ_SIZE)
                     row = int(location[1]/SQ_SIZE)
@@ -87,18 +94,30 @@ def main():
                         else:
                             playerClicks = [sqSelected]
 
+        if not gameOver and not playerTurn:
+            AImove = MoveFinder.findRandomMove(validMoves)
+            if AImove.isPromote:
+                AImove.promoteTo = MoveFinder.findRandomPromote()
+            gs.makeMove(AImove)
+            print(AImove.getChessNotation())
+            moveMade =True
+
         if moveMade:
             validMoves = gs.getValidMoves()
             moveMade = False
         drawGameState(screen, gs, validMoves, sqSelected)
         if len(validMoves) == 0:
             gameOver = True
+            running = False
             if gs.checkmate:
                 drawText(screen, ('Black' if gs.whiteToMove else 'White') + ' wins!!!')
             else:
                 drawText(screen, 'Draw!!!')
+            
         clock.tick(MAX_FPS)
         p.display.flip()
+        if gameOver:
+            sleep(TIME_NOTIFY)
 
 def drawGameState(screen, gs, validMoves, sqSelected):
     drawBoard(screen)
@@ -149,6 +168,7 @@ def drawText(screen, text):
     textObj = font.render(text, 0, p.Color('black'))
     textLoc = p.Rect(0,0,WIDTH,HEIGHT).move(WIDTH/2 - textObj.get_width()/2, HEIGHT/2 - textObj.get_height()/2)
     screen.blit(textObj, textLoc)
+    print(text)
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1])
