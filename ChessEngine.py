@@ -20,6 +20,7 @@ class GameState:
         self.whiteToMove = True
         self.moveLog = []
         self.checkmate = False
+        self.draw = False
 
     def makeMove(self, move):
         self.board[move.startRow][move.startCol] = '--'
@@ -29,7 +30,10 @@ class GameState:
 
     # check checkmate, draw move, error move
     def getValidMoves(self):
-        return self.getAllPossibleMove()  # don't check
+        validMoves = self.getAllPossibleMove()  # don't check
+        if len(validMoves) == 0:
+            pass # assign checkmate and draw throughout gs
+        return validMoves
 
     def getAllPossibleMove(self):
         moves = [] # list of move object, example: Move((6,4), (4,4), self.board)

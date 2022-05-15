@@ -37,69 +37,98 @@ def main(mode = 0, firstTurn = True):
     sqSelected = () # tuple (row, col)
     playerClicks = [] # list of 2 tuples: [(start_row, start_col), (end_row, end_col)]
     while running:
-        playerTurn = (firstTurnForPlayer == gs.whiteToMove) if mode == 1 else False
-        # Player move
-        if not gameOver and playerTurn:
-            for e in p.event.get():
-                if e.type == p.QUIT:
-                    running = False
-                elif e.type == p.MOUSEBUTTONDOWN:
-                    location = p.mouse.get_pos()
-                    col = int(location[0]/SQ_SIZE)
-                    row = int(location[1]/SQ_SIZE)
-                    if sqSelected == (row, col):
-                        sqSelected = ()
-                        playerClicks = []
-                    else:
-                        sqSelected = (row, col)
-                        playerClicks += [sqSelected]
-                    if len(playerClicks) == 2:
-                        move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
-                        if move in validMoves:
-                            if move.isPromote: # pawn promote
-                                piece = ''
-                                srunning = True
-                                drawPromoteSelection(p, screen)
-                                drawGameState(screen, gs, validMoves, ())
-                                drawText(screen, 'Promote!')
-                                p.display.flip()
-                                while srunning:
-                                    for se in p.event.get():
-                                        if se.type == p.QUIT:
-                                            srunning = False
-                                            running = False
-                                        elif se.type == p.MOUSEBUTTONDOWN:
-                                            location = p.mouse.get_pos()
-                                            pieceSelected = int(location[0]/(2*SQ_SIZE))
-                                            if location[1] < DIMENSION*SQ_SIZE:
-                                                break
-                                            else:
-                                                srunning = False
-                                                if pieceSelected == 0:
-                                                    piece = 'q'
-                                                elif pieceSelected == 1:
-                                                    piece = 'r'
-                                                elif pieceSelected == 2:
-                                                    piece = 'n'
-                                                elif pieceSelected == 3:
-                                                    piece = 'b'
-                                screen = p.display.set_mode((WIDTH,HEIGHT))
-                                move.promoteTo = piece
-                            gs.makeMove(move)
-                            print(move.getChessNotation())
-                            moveMade =True
+        if mode == 1 and not gameOver:
+            playerTurn = firstTurnForPlayer == gs.whiteToMove
+            # Player move
+            if playerTurn:
+                for e in p.event.get():
+                    if e.type == p.QUIT:
+                        running = False
+                    elif e.type == p.MOUSEBUTTONDOWN:
+                        location = p.mouse.get_pos()
+                        col = int(location[0]/SQ_SIZE)
+                        row = int(location[1]/SQ_SIZE)
+                        if sqSelected == (row, col):
                             sqSelected = ()
                             playerClicks = []
                         else:
-                            playerClicks = [sqSelected]
-
-        if not gameOver and not playerTurn:
-            AImove = MoveFinder.findRandomMove(validMoves)
-            if AImove.isPromote:
-                AImove.promoteTo = MoveFinder.findRandomPromote()
-            gs.makeMove(AImove)
-            print(AImove.getChessNotation())
-            moveMade =True
+                            sqSelected = (row, col)
+                            playerClicks += [sqSelected]
+                        if len(playerClicks) == 2:
+                            move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
+                            if move in validMoves:
+                                if move.isPromote: # pawn promote
+                                    piece = ''
+                                    srunning = True
+                                    drawPromoteSelection(p, screen)
+                                    drawGameState(screen, gs, validMoves, ())
+                                    drawText(screen, 'Promote!')
+                                    p.display.flip()
+                                    while srunning:
+                                        for se in p.event.get():
+                                            if se.type == p.QUIT:
+                                                srunning = False
+                                                running = False
+                                            elif se.type == p.MOUSEBUTTONDOWN:
+                                                location = p.mouse.get_pos()
+                                                pieceSelected = int(location[0]/(2*SQ_SIZE))
+                                                if location[1] < DIMENSION*SQ_SIZE:
+                                                    break
+                                                else:
+                                                    srunning = False
+                                                    if pieceSelected == 0:
+                                                        piece = 'q'
+                                                    elif pieceSelected == 1:
+                                                        piece = 'r'
+                                                    elif pieceSelected == 2:
+                                                        piece = 'n'
+                                                    elif pieceSelected == 3:
+                                                        piece = 'b'
+                                    screen = p.display.set_mode((WIDTH,HEIGHT))
+                                    move.promoteTo = piece
+                                gs.makeMove(move)
+                                print(move.getChessNotation())
+                                moveMade =True
+                                sqSelected = ()
+                                playerClicks = []
+                            else:
+                                playerClicks = [sqSelected]
+            else:
+                AImove = MoveFinder.findBestMove(gs, validMoves)
+                if AImove is None:
+                    AImove = MoveFinder.findRandomMove(validMoves)
+                if AImove.isPromote:
+                    AImove.promoteTo = MoveFinder.findRandomPromote()
+                gs.makeMove(AImove)
+                print(AImove.getChessNotation())
+                moveMade =True
+        elif mode == 0 and not gameOver:
+            minimaxTurn = firstTurnForPlayer == gs.whiteToMove
+            # Minimax Agent move
+            if minimaxTurn:
+                for e in p.event.get():
+                    if e.type == p.QUIT:
+                        running = False
+                minimaxMove = MoveFinder.findBestMove(gs, validMoves)
+                if minimaxMove is None:
+                    minimaxMove = MoveFinder.findRandomMove(validMoves)
+                if minimaxMove.isPromote:
+                    minimaxMove.promoteTo = MoveFinder.findRandomPromote()
+                gs.makeMove(minimaxMove)
+                print(minimaxMove.getChessNotation())
+                moveMade =True
+            
+            # Random Agent move
+            else:
+                for e in p.event.get():
+                    if e.type == p.QUIT:
+                        running = False
+                AImove = MoveFinder.findRandomMove(validMoves)
+                if AImove.isPromote:
+                    AImove.promoteTo = MoveFinder.findRandomPromote()
+                gs.makeMove(AImove)
+                print(AImove.getChessNotation())
+                moveMade =True
 
         if moveMade:
             validMoves = gs.getValidMoves()
@@ -115,8 +144,10 @@ def main(mode = 0, firstTurn = True):
             
         clock.tick(MAX_FPS)
         p.display.flip()
-        if gameOver:
-            sleep(TIME_NOTIFY)
+        while gameOver:
+            for e in p.event.get():
+                if e.type == p.QUIT:
+                    exit()
 
 def drawGameState(screen, gs, validMoves, sqSelected):
     drawBoard(screen)
@@ -170,4 +201,4 @@ def drawText(screen, text):
     print(text)
 
 if __name__ == "__main__":
-    main(int(sys.argv[1]), bool(int(sys.argv[2])))
+    main(int(sys.argv[1]), not bool(int(sys.argv[2])))
