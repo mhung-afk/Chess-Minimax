@@ -56,6 +56,9 @@ def main(mode = 0, firstTurn = True):
                             playerClicks += [sqSelected]
                         if len(playerClicks) == 2:
                             move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
+                            lstMoves = [v for v in validMoves if v == move]
+                            if len(lstMoves) == 1:
+                                move = lstMoves[0]
                             if move in validMoves:
                                 if move.isPromote: # pawn promote
                                     piece = ''
@@ -137,7 +140,7 @@ def main(mode = 0, firstTurn = True):
         if len(validMoves) == 0:
             gameOver = True
             running = False
-            if gs.checkmate:
+            if gs.checkMate:
                 drawText(screen, ('Black' if gs.whiteToMove else 'White') + ' wins!!!')
             else:
                 drawText(screen, 'Draw!!!')

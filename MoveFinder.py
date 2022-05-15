@@ -3,7 +3,7 @@ import random
 
 pieceScore = {'k': 500, 'q': 9, 'r': 5, 'n': 3, 'b': 3, 'p': 1}
 CHECKMATE = 1000
-DRAW = 0
+STALEMATE = 0
 
 
 def findRandomMove(validMoves):
@@ -27,10 +27,10 @@ def findBestMove(gs, validMoves):
         for opponentMove in opponentMoves:
             slocal_gs = deepcopy(local_gs)
             slocal_gs.makeMove(opponentMove)
-            if slocal_gs.checkmate:
+            if slocal_gs.checkMate:
                 score = -turn * CHECKMATE
-            elif slocal_gs.draw:
-                score = DRAW
+            elif slocal_gs.staleMate:
+                score = STALEMATE
             else:
                 score = -turn * scoreMaterial(slocal_gs.board)
             if score > opponentMaxScore:
