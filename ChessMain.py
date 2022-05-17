@@ -1,7 +1,6 @@
 # handle user interaction
 
 import sys
-from time import sleep
 import pygame as p
 import ChessEngine
 import MoveFinder
@@ -101,7 +100,7 @@ def main(mode = 0, firstTurn = True):
                 if AImove is None:
                     AImove = MoveFinder.findRandomMove(validMoves)
                 if AImove.isPromote:
-                    AImove.promoteTo = MoveFinder.findRandomPromote()
+                    AImove.promoteTo = MoveFinder.findRandomPromote('q')
                 gs.makeMove(AImove)
                 print(AImove.getChessNotation())
                 moveMade =True
@@ -116,7 +115,7 @@ def main(mode = 0, firstTurn = True):
                 if minimaxMove is None:
                     minimaxMove = MoveFinder.findRandomMove(validMoves)
                 if minimaxMove.isPromote:
-                    minimaxMove.promoteTo = MoveFinder.findRandomPromote()
+                    minimaxMove.promoteTo = MoveFinder.findRandomPromote('q')
                 gs.makeMove(minimaxMove)
                 print(minimaxMove.getChessNotation())
                 moveMade =True
@@ -142,7 +141,7 @@ def main(mode = 0, firstTurn = True):
             running = False
             if gs.checkMate:
                 drawText(screen, ('Black' if gs.whiteToMove else 'White') + ' wins!!!')
-            else:
+            elif gs.staleMate:
                 drawText(screen, 'Draw!!!')
             
         clock.tick(MAX_FPS)
