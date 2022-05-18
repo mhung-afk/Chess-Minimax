@@ -28,6 +28,26 @@ def main(mode = 0, firstTurn = True):
     moveMade = False
     gameOver = False
     firstTurnForPlayer = firstTurn # Player will have the first turn
+    
+    combo = 5.0
+    playerScore = agentScore = abs(MoveFinder.scoreBoard(gs))
+    upPlayerScore = upAgentScore = 0
+    def estimate(nextScore, isAgent: bool):
+        nonlocal combo, agentScore, playerScore, upPlayerScore, upAgentScore
+        if isAgent:
+            upAgentScore = nextScore - agentScore
+            agentScore = nextScore
+            if upAgentScore > upPlayerScore:
+                combo += 0.2
+                if combo > 10:
+                    combo = 10
+            else:
+                combo -= 0.2
+                if combo < 0:
+                    combo = 0
+        else:
+            upPlayerScore = nextScore - playerScore
+            playerScore = nextScore
 
     loadImages()
     loadLargeImage()
@@ -95,6 +115,7 @@ def main(mode = 0, firstTurn = True):
                                 playerClicks = []
                             else:
                                 playerClicks = [sqSelected]
+                            estimate(abs(MoveFinder.scoreBoard(gs)), False)
             else:
                 AImove = MoveFinder.findBestMove(gs, validMoves)
                 if AImove is None:
@@ -104,6 +125,9 @@ def main(mode = 0, firstTurn = True):
                 gs.makeMove(AImove)
                 print(AImove.getChessNotation())
                 moveMade =True
+
+                estimate(abs(MoveFinder.scoreBoard(gs)), True)
+                # print(combo)
         elif mode == 0 and not gameOver:
             minimaxTurn = firstTurnForPlayer == gs.whiteToMove
             # Minimax Agent move
@@ -143,6 +167,8 @@ def main(mode = 0, firstTurn = True):
                 drawText(screen, ('Black' if gs.whiteToMove else 'White') + ' wins!!!')
             elif gs.staleMate:
                 drawText(screen, 'Draw!!!')
+            if mode == 1:
+                print('Level of AI Agent: ', combo)
             
         clock.tick(MAX_FPS)
         p.display.flip()
